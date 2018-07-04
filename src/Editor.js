@@ -65,16 +65,23 @@ export default class MyEditor extends Component {
     }
 
     onKeyDown = (event, change) => {
+      event.preventDefault();
+
+      if (event.key === '&') {
+        change.insertText('and');
+        return true;
+      }
 
       if (!event.ctrlKey) return;
-
-      event.preventDefault();
 
       switch (event.key) {
         case '`':
           const isCode = change.value.blocks.some(block => block.type === 'code');
 
           change.setBlocks(isCode ? 'paragraph' : 'code');
+          return true;
+        case '&': 
+          change.insertText('and');
           return true;
       }
     }
