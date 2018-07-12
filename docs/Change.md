@@ -52,7 +52,7 @@ setValue(value: Value, [options: Object]) => Change
 ```js
 deleteBackward(n: number) => Change
 ```
-从当前位置向后删除n个字符。如何selection有内容，就等于`delete()`。`n`的默认值是`1`。
+从当前位置向后删除n个字符。如果selection有内容，就等于`delete()`。`n`的默认值是`1`。
 
 **deleteForward**
 
