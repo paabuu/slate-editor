@@ -142,7 +142,7 @@ export default class MyEditor extends Component {
           const src = node.data.get('src');
 
           return (
-            <img src={src} alt=""/>
+            <img width="100%" src={src} alt=""/>
           )
       }
     }
@@ -253,7 +253,7 @@ export default class MyEditor extends Component {
       const { value } = this.state;
       const change = value.change();
       
-      const src = 'http://static.ohippo.com/quiz/resource/3942a60e-9894-4ab4-80a3-02eeb4ff695d/fd530841-0ad9-4473-a596-dd2f4bcaf3ec.jpg';
+      const src = window.prompt("enter the image url");
       change.call(insertImage, src);
       this.onChange(change);
     }
