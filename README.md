@@ -16,3 +16,7 @@ a rich text editor based on slate.js
 [10. Schema](./docs/Schema.md)
 [11. Text](./docs/Text.md)
 [12. Value]('./docs/Value.md)
+
+## Slate React
+
+[1. Editor](./docs/Editor.md)
