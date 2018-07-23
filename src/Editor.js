@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 
-import { Editor } from 'slate-react';
+import { Editor, getEventRange, getEventTransfer } from 'slate-react';
 import { Value, Block } from 'slate';
 import { LAST_CHILD_TYPE_INVALID } from 'slate-schema-violations';
+import Image from './Image';
+
 import './editor.css';
 
 const initialValue = Value.fromJSON({
@@ -113,7 +115,7 @@ export default class MyEditor extends Component {
     }
 
     renderNode = (props) => {
-      const { attributes, children, node } = props;
+      const { attributes, children, node, isSelected } = props;
 
       switch (props.node.type) {
         case 'code':
@@ -140,9 +142,8 @@ export default class MyEditor extends Component {
           )
         case 'image':
           const src = node.data.get('src');
-
           return (
-            <img width="100%" src={src} alt=""/>
+            <Image src={src} isSelected={isSelected} {...attributes} />
           )
       }
     }
@@ -249,13 +250,24 @@ export default class MyEditor extends Component {
 
     onClickImage = e => {
       e.preventDefault();
+      this.imageInput.click();
+      return;
+    }
 
-      const { value } = this.state;
-      const change = value.change();
-      
-      const src = window.prompt("enter the image url");
-      change.call(insertImage, src);
-      this.onChange(change);
+    onChooseImage = () => {
+      const files = this.imageInput.files;
+      if (files.length === 0) return;
+
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const { value } = this.state;
+        const change = value.change();
+
+        change.call(insertImage, reader.result);
+        this.onChange(change);
+      };
+      reader.readAsDataURL(file);
     }
 
     hasInline = () => {
@@ -279,6 +291,30 @@ export default class MyEditor extends Component {
       const parent = value.document.getParent(value.blocks.first().key);
 
       return this.hasBlock('list-item') && parent && parent.type == type;
+    }
+
+    onDropOrPaste = (event, change, editor) => {
+      const target = getEventRange(event, change.value);
+      if (!target && event.type == 'drop') return;
+
+      const transfer = getEventTransfer(event);
+      const { type, text, files } = transfer;
+
+      if (type == 'files') {
+        for (const file of files) {
+          const reader = new FileReader();
+          const [mime] = file.type.split('/');
+          if (mime != 'image') continue;
+
+          reader.addEventListener('load', () => {
+            editor.change(c => {
+              c.call(insertImage, reader.result, target);
+            })
+          });
+
+          reader.readAsDataURL(file);
+        }
+      }
     }
 
     render() {
@@ -361,13 +397,19 @@ export default class MyEditor extends Component {
               >
                 Image
               </span>
-              <input type="file"/>
+              <input 
+                type="file" 
+                ref={ element => this.imageInput = element }
+                onChange={this.onChooseImage}
+              />
             </div>
             <Editor
                 autoFocus
                 plugins={ plugins }
                 value={ this.state.value }
                 onChange={ this.onChange }
+                onPaste={this.onDropOrPaste}
+                onDrop={this.onDropOrPaste}
                 renderNode={ this.renderNode }
                 renderMark={ this.renderMark }
                 className="editor"

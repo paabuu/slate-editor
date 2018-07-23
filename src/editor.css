@@ -46,3 +46,13 @@ blockquote::before {
     background-color: gold;
     font-size: 14px;
 }
+
+.image-node {
+    display: block;
+    width: 100%;
+    border: 2px solid transparent;
+}
+
+.image-focused {
+    border: 2px solid orange;
+}
