@@ -4,6 +4,7 @@ import { Editor, getEventRange, getEventTransfer } from 'slate-react';
 import { Value, Block } from 'slate';
 import { LAST_CHILD_TYPE_INVALID } from 'slate-schema-violations';
 import Image from './Image';
+import HoverMenu from './HoverMenu';
 
 import './editor.css';
 
@@ -84,6 +85,12 @@ function insertImage(change, src, target) {
   })
 }
 export default class MyEditor extends Component {
+
+    constructor() {
+      super();
+      this.hoverMenu = React.createRef();
+    }
+
     state = {
         value: initialValue
     }
@@ -317,6 +324,27 @@ export default class MyEditor extends Component {
       }
     }
 
+    componentDidUpdate() {
+      this.updateMenu();
+    }
+
+    updateMenu = () => {
+      const { value } = this.state;
+      const menu = this.hoverMenu.current;
+      if (!menu) return;
+
+      if (value.isBlurred || value.isEmpty) {
+        menu.removeAttribute('style');
+        return;
+      }
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      menu.style.opacity = 1;
+      menu.style.top = `${rect.top + window.pageYOffset - menu.offsetHeight}px`;
+      menu.style.left = `${rect.left + window.pageXOffset - menu.offsetWidth / 2 + rect.width / 2}px`;
+    }
+
     render() {
         return (
           <div>
@@ -414,6 +442,11 @@ export default class MyEditor extends Component {
                 renderMark={ this.renderMark }
                 className="editor"
                 schema={ schema }
+            />
+            <HoverMenu 
+              value={this.state.value} 
+              onChange={this.onChange}
+              innerRef={this.hoverMenu}
             />
           </div>
         )

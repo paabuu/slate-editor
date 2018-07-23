@@ -1,0 +1,30 @@
+.hover-menu {
+    position: absolute;
+    top: -2vh;
+    left: -2vw;
+    zindex: 10;
+
+    display: flex;
+    justify-content: space-around;
+    width: 100px;
+    height: 24px;
+    background-color: #000;
+
+    border-radius: 4px;
+    opacity: 0;
+}
+
+.hover-menu-item {
+    width: 30px;
+    height: 24px;
+
+    text-align: center;
+    font-size: 12px;
+    color: #fff;
+    line-height: 24px;
+    cursor: pointer;
+}
+
+.hover-menu-item-active {
+    color: orange;
+}
