@@ -3,10 +3,77 @@ import React, { Component } from 'react';
 import { Editor, getEventRange, getEventTransfer } from 'slate-react';
 import { Value, Block } from 'slate';
 import { LAST_CHILD_TYPE_INVALID } from 'slate-schema-violations';
+import Html from 'slate-html-serializer';
+
 import Image from './Image';
 import HoverMenu from './HoverMenu';
 
 import './editor.css';
+
+const rules = [
+  {
+    serialize(obj, children) {
+      if (obj.object == 'block') {
+        switch(obj.type) {
+          case 'paragraph': 
+            return <p>{children}</p>;
+          case 'heading-one':
+            return <h1>{children}</h1>;
+          case 'heading-two':
+            return <h2>{children}</h2>;
+          case 'heading-three':
+            return <h3>{children}</h3>;
+          case 'list-item':
+            return <li>{children}</li>;
+          case 'numbered-list':
+            return <ol>{children}</ol>;
+          case 'bulleted-list':
+            return <ul>{children}</ul>;
+          case 'blockquote':
+            return <blockquote>{children}</blockquote>;
+          case 'image':
+            const src = obj.data.get('src');
+            return <img src={src} alt=""/>;
+          default:
+            return <div>{children}</div>
+        }
+      }
+    }
+  },
+  {
+    serialize(obj, children) {
+      if (obj.object == 'mark') {
+        switch (obj.type) {
+          case 'bold':
+            return <strong>{children}</strong>;
+          case 'italic':
+            return <em>{children}</em>;
+          case 'underline':
+            return <u>{children}</u>;
+          case 'code':
+            return <pre>{children}</pre>;
+          case 'strikethrough':
+            return <del>{children}</del>
+          default:
+            return children;
+        }
+      } 
+    }
+  },
+  {
+    serialize(obj, children) {
+      if (obj.object == 'inline') {
+        switch (obj.type) {
+          case 'link':
+            const href = obj.data.get('href');
+            return <a href={href}>{children}</a>;
+        }
+      }
+    }
+  }
+];
+
+const html = new Html({rules});
 
 const initialValue = Value.fromJSON({
   document: {
@@ -152,6 +219,8 @@ export default class MyEditor extends Component {
           return (
             <Image src={src} isSelected={isSelected} {...attributes} />
           )
+        case 'paragraph':
+          return <div {...attributes}>{children}</div>
       }
     }
 
@@ -345,6 +414,20 @@ export default class MyEditor extends Component {
       menu.style.left = `${rect.left + window.pageXOffset - menu.offsetWidth / 2 + rect.width / 2}px`;
     }
 
+    toHtml = e => {
+      e.preventDefault();
+      // const serializer = new Html([
+      //   {
+      //     serialize: (node, children) => {
+      //       return '';
+      //     }
+      //   }
+      // ]);
+      const { value } = this.state;
+
+      console.log(html.serialize(value));
+    }
+
     render() {
         return (
           <div>
@@ -425,6 +508,10 @@ export default class MyEditor extends Component {
               >
                 Image
               </span>
+              <span
+                className="icon"
+                onMouseDown={ this.toHtml }
+              >ToHTML</span>
               <input 
                 type="file" 
                 ref={ element => this.imageInput = element }
