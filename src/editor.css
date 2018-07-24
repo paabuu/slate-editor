@@ -68,3 +68,21 @@ blockquote::before {
 .header-3 {
     color: red;
 }
+
+.editor-image {
+    overflow: hidden;
+}
+
+.caption-input {
+    width: 100%;
+    height: 30px;
+
+    line-height: 30px;
+    text-align: center;
+    font-size: 14px;
+    
+    border: none;
+    outline: none;
+    background-color: transparent;
+
+}

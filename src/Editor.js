@@ -35,7 +35,13 @@ const rules = [
             return <blockquote>{children}</blockquote>;
           case 'image':
             const src = obj.data.get('src');
-            return <img src={src} alt=""/>;
+            const caption = obj.data.get('caption');
+            return (
+              <figure>
+                <img src={src} alt=""/>
+                <figcaption>{caption}</figcaption>
+              </figure>
+            );
           default:
             return <div>{children}</div>
         }
@@ -160,7 +166,6 @@ const plugins = [
   heading(3),
 ];
 
-
 function insertImage(change, src, target) {  
   if (target) {
     change.select(target);
@@ -169,7 +174,7 @@ function insertImage(change, src, target) {
   change.insertBlock({
     type: 'image',
     isVoid: true,
-    data: { src }
+    data: { src, caption: '' }
   })
 }
 export default class MyEditor extends Component {
@@ -231,8 +236,18 @@ export default class MyEditor extends Component {
           )
         case 'image':
           const src = node.data.get('src');
+          const caption = node.data.get('caption');
+          const { value } = this.state;
+          const change = value.change();
+
           return (
-            <Image src={src} isSelected={isSelected} {...attributes} />
+            <Image 
+              src={src} 
+              caption={caption}
+              update={data => this.updateImage(node.key, data)}
+              isSelected={isSelected} 
+              {...attributes} 
+            />
           )
         case 'paragraph':
           return <div {...attributes}>{children}</div>
@@ -345,6 +360,17 @@ export default class MyEditor extends Component {
       return;
     }
 
+    updateImage = (key, data) => {
+      console.log(data);
+      const change = this.state.value.change();
+      change.setBlocks({
+        type: 'image',
+        key,
+        data
+      });
+      this.onChange(change);
+    }
+
     onChooseImage = () => {
       const files = this.imageInput.files;
       if (files.length === 0) return;
@@ -431,23 +457,18 @@ export default class MyEditor extends Component {
 
     toHtml = e => {
       e.preventDefault();
-      // const serializer = new Html([
-      //   {
-      //     serialize: (node, children) => {
-      //       return '';
-      //     }
-      //   }
-      // ]);
+
       const { value } = this.state;
-      console.log(value.toJSON());
       const $ = cheerio.load(`<div id="container">${html.serialize(value)}</div>`);
       const content = $("#container").children();
       
       content.each(function(index, ele) {
-        if(ele.tagName === 'img') {
-          console.log($(this).attr('src'));
+        const tagName = ele.tagName;
+
+        if(tagName === 'p') {
+          console.log($(this).html());
         } else {
-          console.log($(this).toString());
+          console.log(`<${tagName}>${$(this).html()}</${tagName}>`);
         }
       });
       // console.log(html.serialize(value));
