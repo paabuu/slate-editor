@@ -5,6 +5,8 @@ import { Value, Block } from 'slate';
 import { LAST_CHILD_TYPE_INVALID } from 'slate-schema-violations';
 import Html from 'slate-html-serializer';
 
+import cheerio from 'cheerio';
+
 import Image from './Image';
 import HoverMenu from './HoverMenu';
 
@@ -131,14 +133,33 @@ function markHotKey(options) {
     }
   }
 }
+const heading = (level) => {
+  return {
+    renderNode(props) {
+      const { attributes, children, node, isSelected } = props;
+      const type = `h${level}`;
+      if (node.type === type) {
+        return React.createElement(
+          type,
+          attributes,
+          children
+        )
+      }
+    }
+  }
+};
 
 const plugins = [
   markHotKey({ key: 'b', type: 'bold' }),
   markHotKey({ key: 'i', type: 'italic' }),
   markHotKey({ key: 'u', type: 'underline' }),
   markHotKey({ key: 's', type: 'strikethrough' }),
-  markHotKey({ key: '`', type: 'code' })
-]
+  markHotKey({ key: '`', type: 'code' }),
+  heading(1),
+  heading(2),
+  heading(3),
+];
+
 
 function insertImage(change, src, target) {  
   if (target) {
@@ -196,12 +217,6 @@ export default class MyEditor extends Component {
           return <CodeNode {...props} />;
         case 'bulleted-list':
           return <ul {...attributes}>{children}</ul>
-        case 'heading-one':
-          return <h1 {...attributes}>{children}</h1>
-        case 'heading-two':
-          return <h2 {...attributes}>{children}</h2>
-        case 'heading-three':
-          return <h1 {...attributes}>{children}</h1>
         case 'list-item':
           return <li {...attributes}>{children}</li>
         case 'numbered-list':
@@ -424,8 +439,18 @@ export default class MyEditor extends Component {
       //   }
       // ]);
       const { value } = this.state;
-
-      console.log(html.serialize(value));
+      console.log(value.toJSON());
+      const $ = cheerio.load(`<div id="container">${html.serialize(value)}</div>`);
+      const content = $("#container").children();
+      
+      content.each(function(index, ele) {
+        if(ele.tagName === 'img') {
+          console.log($(this).attr('src'));
+        } else {
+          console.log($(this).toString());
+        }
+      });
+      // console.log(html.serialize(value));
     }
 
     render() {
@@ -461,18 +486,18 @@ export default class MyEditor extends Component {
             <div className="toolbar">
               <span 
                 className="icon" 
-                onMouseDown={(e) => this.onClickBlock(e, 'heading-one')}
-                style={{ color: this.hasBlock('heading-one') ? 'orange' : '#efefef' }}
+                onMouseDown={(e) => this.onClickBlock(e, 'h1')}
+                style={{ color: this.hasBlock('h1') ? 'orange' : '#efefef' }}
               >H1</span>
               <span 
                 className="icon" 
-                onMouseDown={(e) => this.onClickBlock(e, 'heading-two')}
-                style={{ color: this.hasBlock('heading-two') ? 'orange' : '#efefef' }}
+                onMouseDown={(e) => this.onClickBlock(e, 'h2')}
+                style={{ color: this.hasBlock('h2') ? 'orange' : '#efefef' }}
               >H2</span>
               <span 
                 className="icon" 
-                onMouseDown={(e) => this.onClickBlock(e, 'heading-three')}
-                style={{ color: this.hasBlock('heading-three') ? 'orange' : '#efefef' }}
+                onMouseDown={(e) => this.onClickBlock(e, 'h3')}
+                style={{ color: this.hasBlock('h3') ? 'orange' : '#efefef' }}
               >H3</span>
               <span 
                 className="icon" 
