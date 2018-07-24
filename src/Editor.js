@@ -141,7 +141,7 @@ const heading = (level) => {
       if (node.type === type) {
         return React.createElement(
           type,
-          attributes,
+          { ...attributes, className: `header-${level}`},
           children
         )
       }

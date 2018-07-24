@@ -56,3 +56,15 @@ blockquote::before {
 .image-focused {
     border: 2px solid orange;
 }
+
+.header-1 {
+    color: orange;
+}
+
+.header-2 {
+    color: blueviolet;
+}
+
+.header-3 {
+    color: red;
+}
